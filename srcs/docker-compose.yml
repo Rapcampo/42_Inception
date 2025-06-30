@@ -1,0 +1,107 @@
+services:
+
+  nginx:
+    build: ./requirements/nginx
+    image: nginx
+    container_name: nginx
+    volumes:
+      - wordpress-data:/var/www/html
+    ports:
+      - "443:443"
+    configs:
+      - source: nginx-nginx.conf
+        target: /etc/nginx/nginx.conf
+    networks:
+      - inception
+    depends_on:
+      - wordpress
+    restart: unless-stopped
+
+  wordpress:
+    build: ./requirements/wordpress
+    image: wordpress 
+    pull_policy: never
+    container_name: wordpress
+    volumes:
+      - wordpress-data:/var/www/html
+    configs:
+      - source: wordpress-php-fpm-conf.conf
+        target: /etc/php/7.4/fpm/php-fpm.conf
+      - source: wordpress-wp-config.php
+        target: /var/www/html/wp-config.php
+      - source: wordpress-www.conf
+        target: /etc/php/7.4/fpm/pool.d/www.conf
+    secrets:
+      - db_password
+      - wp_admin_password
+      - wp_user_password
+    environment:
+      - WORDPRESS_DB_HOST=${DB_HOST}
+      - WORDPRESS_DB_USER=${DB_USER}
+      - WORDPRESS_DB_NAME=${DB_NAME}
+      - WORDPRESS_DB_PASSWORD_FILE=/run/secrets/db_password
+      - DOMAIN_NAME=${DOMAIN_NAME}
+      - WP_ADMIN=${WP_ADMIN}
+      - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
+      - WP_USER=${WP_USER}
+      - WP_USAR_EMAIL=${WP_USER_EMAIL}
+    networks:
+      - inception
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+
+  mariadb:
+    build: ./requirements/mariadb
+    image: mariadb
+    pull_policy: never
+    container_name: mariadb
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    configs:
+      - source: mariadb-my.cnf
+        target: /etc/mysql/my.cnf
+      - source: mariadb-init.sql
+        target: /etc/mysql/init.sql
+    secrets:
+      - db_password
+      - db_root_password
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD_FILE=/run/secrets/db_password
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
+    networks:
+      - inception
+    restart: unless-stopped
+
+  volumes:
+    wordpress-data:
+      name: wordpress-data
+      driver: local
+      driver_opts:
+        type: none
+        device: ${DATA_PATH}/wordpress
+        o: bind
+    mariadb-data:
+      name: mariadb-data
+      driver: local
+      driver_opts:
+        type: none
+        device: ${DATA_PATH}/mariadb
+        o: bind
+
+  secrets:
+    db_password:
+      file: ../secrets/db_password.txt
+    db_root_password:
+      file: ../secrets/db_root_password.txt
+    wp_admin_password:
+      file: ../secrets/wp_admin_password.txt
+    wp_user_password:
+      file: ../secrets/wp_user_password.txt
+
+  networks:
+    inception:
+      name: inception
+      driver: bridge
