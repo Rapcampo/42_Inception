@@ -1,3 +1,3 @@
-FROM Debia:olstable
+FROM Debian:olstable
 
 
