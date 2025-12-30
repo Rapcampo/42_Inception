@@ -1,6 +1,6 @@
 #!bin/bash
 
-if [-f /etc/mysql/init.sql]; then
+if [ -f /etc/mysql/init.sql ]; then
 	export MYSQL_ROOT_PASSWORD="$(< /run/secrets/db_root_password)" && \
 	export MYSQL_PASSWORD="$(< /run/secrets/db_password)" && \
 	envsubst < /etc/mysql/init.sql > /tmp/init.sql
