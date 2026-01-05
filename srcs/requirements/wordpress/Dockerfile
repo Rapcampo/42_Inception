@@ -15,8 +15,8 @@ RUN chown -R www-data:www-data /var/www/html && \
 RUN curl -o https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
 	chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp
 
-COPY tools/start.sh /usr/local/bin/start.sh
+COPY tools/script.sh /usr/local/bin/script.sh
 
-RUN chmod +x /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/script.sh
 
 ENTRYPOINT ["start.sh"]
