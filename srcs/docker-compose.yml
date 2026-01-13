@@ -75,33 +75,47 @@ services:
       - inception
     restart: unless-stopped
 
-  volumes:
-    wordpress-data:
-      name: wordpress-data
-      driver: local
-      driver_opts:
-        type: none
-        device: ${DATA_PATH}/wordpress
-        o: bind
-    mariadb-data:
-      name: mariadb-data
-      driver: local
-      driver_opts:
-        type: none
-        device: ${DATA_PATH}/mariadb
-        o: bind
+volumes:
+  wordpress-data:
+    name: wordpress-data
+    driver: local
+    driver_opts:
+      type: none
+      device: ${DATA_PATH}/wordpress
+      o: bind
+  mariadb-data:
+    name: mariadb-data
+    driver: local
+    driver_opts:
+      type: none
+      device: ${DATA_PATH}/mariadb
+      o: bind
 
-  secrets:
-    db_password:
-      file: ../secrets/db_password.txt
-    db_root_password:
-      file: ../secrets/db_root_password.txt
-    wp_admin_password:
-      file: ../secrets/wp_admin_password.txt
-    wp_user_password:
-      file: ../secrets/wp_user_password.txt
+configs:
+  nginx-nginx.conf:
+    file: ./requirements/nginx/conf/nginx.conf
+  wordpress-php-fpm-conf.conf:
+    file: ./requirements/wordpress/conf/php-fpm.conf
+  wordpress-wp-config.php:
+    file: ./requirements/wordpress/conf/wp-config.php
+  wordpress-www.conf:
+    file: ./requirements/wordpress/conf/www.conf
+  mariadb-my.conf:
+    file: ./requirements/mariadb/conf/my.cnf
+  mariadb-init.sql:
+    file: ./requirements/mariadb/conf/init.sql
 
-  networks:
-    inception:
-      name: inception
-      driver: bridge
+secrets:
+  db_password:
+    file: ../secrets/db_password.txt
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  wp_admin_password:
+    file: ../secrets/wp_admin_password.txt
+  wp_user_password:
+    file: ../secrets/wp_user_password.txt
+
+networks:
+  inception:
+    name: inception
+    driver: bridge
