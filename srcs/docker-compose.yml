@@ -100,7 +100,7 @@ configs:
     file: ./requirements/wordpress/conf/wp-config.php
   wordpress-www.conf:
     file: ./requirements/wordpress/conf/www.conf
-  mariadb-my.conf:
+  mariadb-my.cnf:
     file: ./requirements/mariadb/conf/my.cnf
   mariadb-init.sql:
     file: ./requirements/mariadb/conf/init.sql

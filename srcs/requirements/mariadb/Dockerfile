@@ -1,4 +1,4 @@
-FROM Debian:olstable
+FROM debian:oldstable
 
 RUN apt update && apt install -y gettext-base mariadb-server \
 	&& apt clean && rm -rf /var/lib/apt/lists/* && mkdir -p /run/mysqld && \
