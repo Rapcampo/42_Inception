@@ -1,119 +1,89 @@
 services:
-
   nginx:
     build: ./requirements/nginx
     image: nginx
+    pull_policy: never
     container_name: nginx
+    restart: unless-stopped
     volumes:
-      - wordpress-data:/var/www/html
+      - wp-data:/var/www/html
     ports:
-      - "443:443"
+      - 443:443
+    networks:
+      - inception
     configs:
       - source: nginx-nginx.conf
         target: /etc/nginx/nginx.conf
-    networks:
-      - inception
+    env_file:
+      - .env
     depends_on:
       - wordpress
-    restart: unless-stopped
-
-  wordpress:
-    build: ./requirements/wordpress
-    image: wordpress 
-    pull_policy: never
-    container_name: wordpress
-    volumes:
-      - wordpress-data:/var/www/html
-    configs:
-      - source: wordpress-php-fpm-conf.conf
-        target: /etc/php/7.4/fpm/php-fpm.conf
-      - source: wordpress-wp-config.php
-        target: /var/www/html/wp-config.php
-      - source: wordpress-www.conf
-        target: /etc/php/7.4/fpm/pool.d/www.conf
-    secrets:
-      - db_password
-      - wp_admin_password
-      - wp_user_password
-    environment:
-      - WORDPRESS_DB_HOST=${DB_HOST}
-      - WORDPRESS_DB_USER=${DB_USER}
-      - WORDPRESS_DB_NAME=${DB_NAME}
-      - WORDPRESS_DB_PASSWORD_FILE=/run/secrets/db_password
-      - DOMAIN_NAME=${DOMAIN_NAME}
-      - WP_ADMIN=${WP_ADMIN}
-      - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
-      - WP_USER=${WP_USER}
-      - WP_USAR_EMAIL=${WP_USER_EMAIL}
-    networks:
-      - inception
-    depends_on:
-      - mariadb
-    restart: unless-stopped
 
   mariadb:
     build: ./requirements/mariadb
     image: mariadb
     pull_policy: never
+    restart: unless-stopped
     container_name: mariadb
-    volumes:
-      - mariadb-data:/var/lib/mysql
-    configs:
-      - source: mariadb-my.cnf
-        target: /etc/mysql/my.cnf
-      - source: mariadb-init.sql
-        target: /etc/mysql/init.sql
     secrets:
+      - wp_admin_password
       - db_password
       - db_root_password
-    environment:
-      - MYSQL_DATABASE=${DB_NAME}
-      - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD_FILE=/run/secrets/db_password
-      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
+    volumes:
+      - db-data:/var/lib/mysql
     networks:
       - inception
-    restart: unless-stopped
+    env_file:
+      - .env
 
-volumes:
-  wordpress-data:
-    name: wordpress-data
-    driver: local
-    driver_opts:
-      type: none
-      device: ${DATA_PATH}/wordpress
-      o: bind
-  mariadb-data:
-    name: mariadb-data
-    driver: local
-    driver_opts:
-      type: none
-      device: ${DATA_PATH}/mariadb
-      o: bind
+  wordpress:
+    build: ./requirements/wordpress
+    image: wordpress
+    pull_policy: never
+    restart: unless-stopped
+    container_name: wordpress
+    secrets:
+      - wp_admin_password
+      - wp_user_password
+      - db_password
+    volumes:
+      - wp-data:/var/www/html
+    networks:
+      - inception
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
 
 configs:
   nginx-nginx.conf:
-    file: ./requirements/nginx/conf/nginx.conf
-  wordpress-php-fpm-conf.conf:
-    file: ./requirements/wordpress/conf/php-fpm.conf
-  wordpress-wp-config.php:
-    file: ./requirements/wordpress/conf/wp-config.php
-  wordpress-www.conf:
-    file: ./requirements/wordpress/conf/www.conf
-  mariadb-my.cnf:
-    file: ./requirements/mariadb/conf/my.cnf
-  mariadb-init.sql:
-    file: ./requirements/mariadb/conf/init.sql
+    file: ./requirements/nginx/dependancies/nginx.conf 
+
+volumes:
+  wp-data:
+    name: wp-data
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/rapcampo/data/wordpress
+      o: bind
+  db-data:
+    name: db-data
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/rapcampo/data/mariadb
+      o: bind
 
 secrets:
-  db_password:
-    file: ../secrets/db_password.txt
-  db_root_password:
-    file: ../secrets/db_root_password.txt
-  wp_admin_password:
-    file: ../secrets/wp_admin_password.txt
   wp_user_password:
     file: ../secrets/wp_user_password.txt
+  wp_admin_password:
+    file: ../secrets/wp_admin_password.txt
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  db_password:
+    file: ../secrets/db_password.txt
 
 networks:
   inception:
