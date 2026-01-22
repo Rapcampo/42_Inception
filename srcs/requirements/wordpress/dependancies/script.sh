@@ -30,6 +30,8 @@ if [ ! -f wp-config.php ]; then
 	wp user create --allow-root \
 		"$WP_USER" "$WP_EMAIL" \
 		--user_pass="$WP_USER_PASS"
+	sed -i 's|^listen = .*|listen = 9000|g' /etc/php/*/fpm/pool.d/www.conf
+	sed -i 's|^;*listen.allowed_clients = .*|;listen.allowed_clients = 127.0.0.1|g' /etc/php/*/fpm/pool.d/www.conf
 
 	echo "Wordpress installation finished!"
 else

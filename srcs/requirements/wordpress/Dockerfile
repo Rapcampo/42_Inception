@@ -17,6 +17,8 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 	&& chmod +x wp-cli.phar \
 	&& mv wp-cli.phar /usr/local/bin/wp
 
+WORKDIR /var/www/html
+
 COPY dependancies/script.sh /usr/local/bin/script.sh
 
 RUN chmod +x /usr/local/bin/script.sh
