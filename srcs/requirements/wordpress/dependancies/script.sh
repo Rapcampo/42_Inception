@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-set -e
-
-WP_ADMIN_PASSWORD="$(</run/secrets/wp_admin_password.txt)"
-WP_DB_PASSWORD="$(</run/secrets/db_password.txt)"
-WP_USER_PASSWORD="$(</run/secrets/wp_user_password.txt)"
+export WP_ADMIN_PASSWORD="$(< /run/secrets/wp_admin_password)"
+export WP_DB_PASSWORD="$(< /run/secrets/db_password)"
+export WP_USER_PASSWORD="$(< /run/secrets/wp_user_password)"
 
 until mysqladmin ping -h"$WP_DB_HOST" -u"$WP_DB_USER" -p"$WP_USER_PASSWORD" --silent; do
 	sleep 1
@@ -38,4 +36,4 @@ else
 	echo "Wordpress has already been installed"
 fi
 
-exec php-fpm83 -F
+exec php-fpm -F
