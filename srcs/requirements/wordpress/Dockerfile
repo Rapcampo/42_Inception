@@ -1,7 +1,7 @@
 FROM debian:oldstable
 
 RUN apt update && apt install -y php-fpm php-mysql curl unzip \
-	default-mysql-client && apt clean \
+	default-mysql-client && apt clean && rm -rf /var/lib/apt/lists/* \
 	&& mkdir -p /run/php
 
 RUN curl -O https://wordpress.org/latest.tar.gz && \
