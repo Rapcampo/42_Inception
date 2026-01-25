@@ -33,12 +33,12 @@ services:
       - db-data:/var/lib/mysql
     networks:
       - inception
-    environment:
-      - WP_DB_HOST=${WP_DB_HOST}
-      - WP_DB_NAME=${WP_DB_NAME}
-      - WP_DB_USER=${WP_DB_USER}
     env_file:
       - .env
+    environment:
+      - WP_DB_HOST
+      - WP_DB_NAME
+      - WP_DB_USER
 
   wordpress:
     build: ./requirements/wordpress
@@ -54,16 +54,16 @@ services:
       - wp-data:/var/www/html
     networks:
       - inception
-    environment:
-      - WP_DB_HOST=${WP_DB_HOST}
-      - WP_DB_NAME=${WP_DB_NAME}
-      - WP_DB_USER=${WP_DB_USER}
-      - WP_ADMIN_USER=${WP_ADMIN_USER}
-      - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
-      - WP_USER=${WP_USER}
-      - WP_EMAIL=${WP_EMAIL}
     env_file:
       - .env
+    environment:
+      - WP_DB_HOST
+      - WP_DB_NAME
+      - WP_DB_USER
+      - WP_ADMIN_USER
+      - WP_ADMIN_EMAIL
+      - WP_USER
+      - WP_EMAIL
     depends_on:
       - mariadb
 

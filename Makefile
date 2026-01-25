@@ -31,5 +31,5 @@ log_nginx:
 	docker compose -f ./srcs/docker-compose.yml logs -f nginx
 
 database:
-	docker exec -it mariadb sh -lc 'mariadb -uroot -p"$(cat /run/secrets/db_root_pass)" -e "SELECT user,host FROM mysql.user;"'
+	docker exec -it mariadb sh -lc 'mariadb -uroot -p"$(cat ./secrets/db_root_pass)" -e "SELECT user,host FROM mysql.user;"'
 .PHONY: all up down re clean fclean
