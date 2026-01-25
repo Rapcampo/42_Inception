@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-export WP_ADMIN_PASSWORD="$(< /run/secrets/wp_admin_password)"
-export WP_DB_PASSWORD="$(< /run/secrets/db_password)"
-export WP_USER_PASSWORD="$(< /run/secrets/wp_user_password)"
+export WP_ADMIN_PASSWORD="$(< /run/secrets/wp_admin_pass)"
+export WP_DB_PASSWORD="$(< /run/secrets/db_pass)"
+export WP_USER_PASSWORD="$(< /run/secrets/wp_user_pass)"
 
-until mysqladmin ping -h"$WP_DB_HOST" -u"$WP_DB_USER" -p"$WP_USER_PASSWORD" --silent; do
+until mysqladmin ping -h"$WP_DB_HOST" -u"$WP_DB_USER" -p"$WP_USER_PASSWORD"; do
 	sleep 1
 done
 
@@ -29,13 +29,11 @@ if [ ! -f wp-config.php ]; then
 
 	wp user create --allow-root \
 		"$WP_USER" "$WP_EMAIL" \
-		--user_pass="$WP_USER_PASS"
-	sed -i 's|^listen = .*|listen = 9000|g' /etc/php/*/fpm/pool.d/www.conf
-	sed -i 's|^;*listen.allowed_clients = .*|;listen.allowed_clients = 127.0.0.1|g' /etc/php/*/fpm/pool.d/www.conf
+		--user_pass="$WP_USER_PASSWORD"
 
 	echo "Wordpress installation finished!"
 else
 	echo "Wordpress has already been installed"
 fi
 
-exec php-fpm -F
+exec php-fpm8.2 -F

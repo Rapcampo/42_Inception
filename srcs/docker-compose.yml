@@ -26,13 +26,17 @@ services:
     restart: unless-stopped
     container_name: mariadb
     secrets:
-      - wp_admin_password
-      - db_password
-      - db_root_password
+      - wp_admin_pass
+      - db_pass
+      - db_root_pass
     volumes:
       - db-data:/var/lib/mysql
     networks:
       - inception
+    environment:
+      - WP_DB_HOST=${WP_DB_HOST}
+      - WP_DB_NAME=${WP_DB_NAME}
+      - WP_DB_USER=${WP_DB_USER}
     env_file:
       - .env
 
@@ -43,13 +47,21 @@ services:
     restart: unless-stopped
     container_name: wordpress
     secrets:
-      - wp_admin_password
-      - wp_user_password
-      - db_password
+      - wp_admin_pass
+      - wp_user_pass
+      - db_pass
     volumes:
       - wp-data:/var/www/html
     networks:
       - inception
+    environment:
+      - WP_DB_HOST=${WP_DB_HOST}
+      - WP_DB_NAME=${WP_DB_NAME}
+      - WP_DB_USER=${WP_DB_USER}
+      - WP_ADMIN_USER=${WP_ADMIN_USER}
+      - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
+      - WP_USER=${WP_USER}
+      - WP_EMAIL=${WP_EMAIL}
     env_file:
       - .env
     depends_on:
@@ -58,6 +70,8 @@ services:
 configs:
   nginx-nginx.conf:
     file: ./requirements/nginx/dependancies/nginx.conf 
+  mariadb-my.cnf:
+    file: ./requirements/mariadb/dependancies/my.cnf
 
 volumes:
   wp-data:
@@ -76,13 +90,13 @@ volumes:
       o: bind
 
 secrets:
-  wp_user_password:
+  wp_user_pass:
     file: ../secrets/wp_user_password.txt
-  wp_admin_password:
+  wp_admin_pass:
     file: ../secrets/wp_admin_password.txt
-  db_root_password:
+  db_root_pass:
     file: ../secrets/db_root_password.txt
-  db_password:
+  db_pass:
     file: ../secrets/db_password.txt
 
 networks:
