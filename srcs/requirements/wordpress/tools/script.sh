@@ -28,4 +28,4 @@ if ! wp core is-installed --path=/var/www/html --allow-root; then
 	wp option update home "${WP_URL}" --path=/var/www/html --allow-root
 fi
 
-exec "php-fmp7.4" "-F"
+exec "php-fmp" "-F"

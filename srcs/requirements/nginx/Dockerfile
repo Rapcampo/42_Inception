@@ -10,5 +10,6 @@ RUN mkdir -p /etc/nginx/ssl/ && \
 	-out /etc/nginx/ssl/nginx.crt \
 	-subj "/C=PT/ST/Porto/L=Porto/O=42/OU=Dev/CN=rapcampo.42.fr"
 
+EXPOSE 443
 # run in the foreground
 CMD ["nginx", "-g", "daemon off;"]
