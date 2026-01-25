@@ -4,16 +4,10 @@ set -e
 
 DATADIR=/var/lib/mysql
 SOCKET=/run/mysql/mysqld.sock
-DB_ROOT_PASSWORD="$(< /run/secrets/db_root_pass)"
-WP_DB_PASSWORD="$(< /run/secrets/db_pass)"
+DB_ROOT_PASSWORD="$(cat /run/secrets/db_root_pass)"
+WP_DB_PASSWORD="$(cat /run/secrets/db_pass)"
 
-:"${WP_BD_NAME:?WP_DB_NAME not set}"
-:"${WP_BD_PASSWORD:?WP_DB_NAME not set}"
-
-mkdir -p /run/mysqld
-chown -R mysql:mysql /run/mysqld "$DATADIR"
-
-if [ ! -d "$DATADIR/mysql" ]; then
+if [ ! -d "$DATADIR" ]; then
 	echo "Starting MariaDB"
 
 	mariadb-install-db --user=mysql --datadir="$DATADIR"
@@ -27,7 +21,7 @@ if [ ! -d "$DATADIR/mysql" ]; then
 		sleep 1
 	done
 
-	mariadb --protocol=socket --socket="$SOCKET" -u root <<EOSQL
+	mariadb -uroot -p"$DB_ROOT_PASSWORD" <<EOSQL
 	ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
 	CREATE DATABASE IF NOT EXISTS \`${WP_DB_NAME}\`;
 	CREATE USER IF NOT EXISTS '${WP_DB_USER}'@'%' IDENTIFIED BY '${WP_DB_PASSWORD}';
