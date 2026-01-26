@@ -8,6 +8,8 @@ until mysqladmin ping -h"$WP_DB_HOST" -u"$WP_DB_USER" -p"$WP_USER_PASSWORD"; do
 	sleep 1
 done
 
+cd /var/www/html
+
 if [ ! -f wp-config.php ]; then
 	echo "Downloading and Installing wordpress"
 

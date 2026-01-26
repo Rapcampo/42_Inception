@@ -8,10 +8,11 @@ up:
 down:
 	docker compose -f ./srcs/docker-compose.yml down
 
-re: clean up
+re: 
+	docker compose -f ./srcs/docker-compose.yml up -d --build --force-recreate
 
 clean:
-	docker compose -f ./srcs/docker-compose.yml down -v
+	docker compose -f ./srcs/docker-compose.yml down -v 
 
 fclean:
 	docker stop $$(docker ps -qa)
@@ -31,5 +32,8 @@ log_nginx:
 	docker compose -f ./srcs/docker-compose.yml logs -f nginx
 
 database:
-	docker exec -it mariadb sh -lc 'mariadb --protocol=socket --socket=/run/mysql/mysqld.sock -uroot -p"$(cat ./secrets/db_root_pass)" -e "SELECT user,host FROM mysql.user;"'
+	docker exec -it mariadb sh -lc 'mariadb -uroot -p"$(cat /run/secrets/db_root_pass)" -e "SHOW DATABASES; SELECT user,host FROM mysql.user;"'
+tables:
+	docker exec -it mariadb sh -lc 'mariadb -uroot -p"$(cat /run/secrets/db_root_pass)" -e "SHOW DATABASES; USE \`$WP_DB_NAME\`; SHOW TABLES;"'
+
 .PHONY: all up down re clean fclean
