@@ -35,10 +35,6 @@ services:
       - inception
     env_file:
       - .env
-    environment:
-      - WP_DB_HOST
-      - WP_DB_NAME
-      - WP_DB_USER
 
   wordpress:
     build: ./requirements/wordpress
@@ -56,14 +52,6 @@ services:
       - inception
     env_file:
       - .env
-    environment:
-      - WP_DB_HOST
-      - WP_DB_NAME
-      - WP_DB_USER
-      - WP_ADMIN_USER
-      - WP_ADMIN_EMAIL
-      - WP_USER
-      - WP_EMAIL
     depends_on:
       - mariadb
 

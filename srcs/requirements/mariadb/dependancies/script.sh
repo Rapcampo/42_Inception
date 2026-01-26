@@ -3,12 +3,12 @@
 set -e
 
 DATADIR=/var/lib/mysql
-SOCKET=/run/mysql/mysqld.sock
+SOCKET=/tmp/mysql.sock
 DB_ROOT_PASSWORD="$(cat /run/secrets/db_root_pass)"
 WP_DB_PASSWORD="$(cat /run/secrets/db_pass)"
 
 echo "Starting MariaDB"
-if [ ! -d "$DATADIR" ]; then
+if [ ! -d "$DATADIR"/mysql ]; then
 
 	mariadb-install-db --user=mysql --datadir="$DATADIR"
 fi
