@@ -1,3 +1,25 @@
+*This project has been created as part of the 42 curriculum by Rapcampo*
+
+# Description
+
+## Brief overview
+
+## Virtual Machines vs Docker
+
+## Secrets vs Enviroment Variables
+
+## Docker Network vs Host Network
+
+## Docker Volumes vs Bind Mounts
+
+# Instruction
+
+# Resources
+
+(link to USER_DOC)
+
+(link to DEV_DOC)
+
 important commands:
 `docker exec -it [container name] [command to be used]`
 verify ssl certs and version
