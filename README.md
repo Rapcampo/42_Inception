@@ -2,12 +2,13 @@
 
 # Contents
 - [Description](#description)
- - [Brief Overview](#brief-overview) 
- - [Virtual Machines vs Docker](#virtual-machines-vs-docker)
- - [Secrets Vs Environment Variables](#secrets-vs-environment-variables)
- - [Docker Network vs Host Network](#docker-network-vs-host-network)
- - [Docker Volumes vs Bind Mounts](#docker-volumes-vs-bind-mounts)
+  - [Brief Overview](#brief-overview) 
 - [Instructions](#instructions)
+- [Technical Considerations](#technical-considerations)
+  - [Virtual Machines vs Docker](#virtual-machines-vs-docker)
+  - [Secrets vs Environment Variables](#secrets-vs-environment-variables)
+  - [Docker Network vs Host Network](#docker-network-vs-host-network)
+  - [Docker Volumes vs Bind Mounts](#docker-volumes-vs-bind-mounts)
 - [Resources](#resources)
 
 ## Description
@@ -16,13 +17,15 @@
 
 ### Virtual Machines vs Docker
 
-### Secrets vs Enviroment Variables
+### Secrets vs Environment Variables
 
 ### Docker Network vs Host Network
 
 ### Docker Volumes vs Bind Mounts
 
-## Instruction
+## Instructions
+
+## Technical Considerations
 
 ## Resources
 
