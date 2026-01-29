@@ -1,20 +1,30 @@
 *This project has been created as part of the 42 curriculum by Rapcampo*
 
-# Description
+# Contents
+- [Description](#description)
+ - [Brief Overview](#brief-overview) 
+ - [Virtual Machines vs Docker](#virtual-machines-vs-docker)
+ - [Secrets Vs Environment Variables](#secrets-vs-environment-variables)
+ - [Docker Network vs Host Network](#docker-network-vs-host-network)
+ - [Docker Volumes vs Bind Mounts](#docker-volumes-vs-bind-mounts)
+- [Instructions](#instructions)
+- [Resources](#resources)
 
-## Brief overview
+## Description
 
-## Virtual Machines vs Docker
+### Brief overview
 
-## Secrets vs Enviroment Variables
+### Virtual Machines vs Docker
 
-## Docker Network vs Host Network
+### Secrets vs Enviroment Variables
 
-## Docker Volumes vs Bind Mounts
+### Docker Network vs Host Network
 
-# Instruction
+### Docker Volumes vs Bind Mounts
 
-# Resources
+## Instruction
+
+## Resources
 
 (link to USER_DOC)
 
