@@ -37,7 +37,7 @@ The key goals for this project are the following:
 - Docker Engine
 - Docker Compose (usually bundled with Docker)
 - GNU Make
-- Adminstrator access (sudo privileges): for changes in `/etc/hosts` entries & removal of proctected volumes
+- Adminstrator access (sudo privileges): for changes in `/etc/hosts` entries and removal of protected volumes
 
 ### Build
 1. Clone the repository
@@ -53,6 +53,7 @@ echo "[your_wordpress_user_password]" > secrets/wp_user_password.txt
 echo "[your_wordpress_admin_password]" > secrets/wp_admin_password.txt
 ```
 3. Build and launch
+
 On the root of the project folder where you see Makefile file.
 ```bash
 make up #or just "make" as a shorhand
@@ -63,6 +64,14 @@ make up #or just "make" as a shorhand
 Since the project has very specific requirements regarding volume mounting, password protection and networking, it is important to notice a few technical considerations regarding the choises required for this project. 
 
 ### Virtual Machines vs Docker
+When it comes to the difference between Virtual Machines (hereforth VMs) and Docker, one must understand the security, resources and isolation requirements, here is a basic overview of the differences between both:
+| VMs | Docker |
+| --- | ------ |
+| Virtualizes hardware | Virtualizes application layer |
+| Runs a separate kernel | Uses host kernel |
+| Larger resource footprint | Lightweight and fast |
+| Very strong isolation | Strong-enough isolation, less than VMs |
+
 
 ### Secrets vs Environment Variables
 
