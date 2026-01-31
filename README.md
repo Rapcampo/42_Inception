@@ -3,6 +3,7 @@
 # Contents
 - [Description](#description)
   - [Brief Overview](#brief-overview) 
+  - [Key goals](#key-goals)
 - [Instructions](#instructions)
   - [Pre-requisites](#pre-requisites)
   - [Build](#build)
@@ -14,9 +15,11 @@
 - [Resources](#resources)
 
 ## Description
+
 Inception is a system administration and DevOps-oriented project. The project is focused on automated-deployment and containerized WordPress LEMP stack small infrastructure. The goal is to design, build and run a multi-service stack with strong isolation, reproducibility, and security constraints, using Docker Compose and custom-built Docker images.
 
 ### Brief overview
+
 The aim of this project is to provide a turn-key Docker infrastructure for running a persistent production-like Wordpress website on your local machine. it is composed of:
 - Nginx as a secure HTTPS reverse proxy acting as a single entrypoint into the infrastructe
 - Wordpress with pre-configured PHP-FPM
@@ -25,6 +28,7 @@ The aim of this project is to provide a turn-key Docker infrastructure for runni
 - A Makefile with all the common workflows (build, up, down, clean) and some debug features (database check, logs)
 
 ### Key goals
+
 The key goals for this project are the following:
 - Understand how services are separated into containers and connect through Docker Networking
 - Understand how to build custom Docker images (one Docker file per service) without relying on pre-built images from Dockerhub
@@ -35,6 +39,7 @@ The key goals for this project are the following:
 ## Instructions
 
 ### Pre-requisites
+
 - Operating System: Linux (requires sudo privileges for host-file edits)
 - Docker Engine
 - Docker Compose (usually bundled with Docker)
@@ -42,12 +47,15 @@ The key goals for this project are the following:
 - Adminstrator access (sudo privileges): for changes in `/etc/hosts` entries and removal of protected volumes
 
 ### Build
+
 1. Clone the repository
+
 ```bash
 git clone git@github.com:Rapcampo/42_Inception.git inception
 cd inception
 ```
 2. Populate the secret files
+
 ```bash
 echo "[your_database_user_password]" > secrets/db_password.txt
 echo "[your_database_root_password]" > secrets/db_root_password.txt
@@ -60,12 +68,14 @@ On the root of the project folder where you see Makefile file.
 ```bash
 make up #or just "make" as a shorhand
 ```
-**Note**: services will keep running and restarting unless stopped using `make down`
+> **Note**: services will keep running and restarting unless stopped using `make down`
 
 ## Technical Considerations
+
 Since the project has very specific requirements regarding volume mounting, password protection and networking, it is important to notice a few technical considerations regarding the choices required for this project. 
 
 ### Virtual Machines vs Docker
+
 When it comes to the difference between Virtual Machines (hereforth VMs) and Docker, one must understand the security, resources and isolation requirements, here is a basic overview of the differences between both:
 
 | VMs | Docker |
@@ -79,6 +89,7 @@ When it comes to the difference between Virtual Machines (hereforth VMs) and Doc
 In the case of the project, both are used since the infrastucture is deployed inside a virtual machine. However, if we were to look at just the infrastructure itself, the requirements are easy of deployment, reproducibility, clear service separation and isolation. Being ephemeral, idempotent and immutable makes these Docker containers a clear choice for the project.
 
 ### Secrets vs Environment Variables
+
 In this project the use of Docker Secrets is heavily emphasized, a simple breakdown of the differences is:
 
 | Secrets | Envs |
@@ -90,6 +101,7 @@ In this project the use of Docker Secrets is heavily emphasized, a simple breakd
 As there is a risk of exposure of sensitive data through env dumps and logging, the use of secrets is a very important good practice for an overall more secure infrastructure. A .env file should almost always only have non-sensitive information in it.
 
 ### Docker Network vs Host Network
+
 It is very important that the project runs on an isolated network using Docker networks, as a host network creates security risks and possible port conflicts, to summarize:
 
 | Docker Network | Host Network |
@@ -102,6 +114,7 @@ It is very important that the project runs on an isolated network using Docker n
 As a general rule of thumb, should only be used as an exception for cases where optimization is required or a container needs to handle a large number of ports. Since Docker has a plentitude of network driver options for different use cases, such as Bridge, Macvlan, IPvlan, none and Overlay, in most cases, one should opt for a Docker network. 
 
 ### Docker Volumes vs Bind Mounts
+
 When it comes to Docker volumes and Bind mounts, here are the follwing considerations:
 
 | Docker Volume| Bind Mounts |
