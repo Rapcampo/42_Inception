@@ -76,7 +76,7 @@ On the root of the project folder where you see Makefile file.
 ```bash
 make up #or just "make" as a shorhand
 ```
-> **Note**: services will keep running and restarting unless stopped using `make down`
+> :exclamation: **Note**: services will keep running and restarting unless stopped using `make down`
 
 ## Technical Considerations
 

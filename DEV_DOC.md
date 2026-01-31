@@ -14,7 +14,7 @@
 
 ## Description
 
-> **Note**: For installation and overview of the project, refer to the [Readme](README.md) in this reposoritory.
+> :bulb: **Note**: For installation and overview of the project, refer to the [Readme](README.md) in this repository.
 
 This is a developer intended documentation aimed to provide detailed explanation about the following contents:
 
@@ -27,15 +27,27 @@ This is a developer intended documentation aimed to provide detailed explanation
 
 ### Prerequisites
 
+---
+
 ### Virtual Machine Setup
+
+---
 
 ### Configuration Files
 
+---
+
 ### Setting up Secrets
+
+---
 
 ### Makefile and Docker Compose
 
+---
+
 ### Docker Volumes
+
+---
 
 ## Relevant Commands
 
@@ -52,7 +64,7 @@ pid 1 is important for docker to keep track of the health of the container, ther
 
 ## Resources
 
-> **Note**: For all the resources pertaining the general documentation and information regarding the technical aspects of this project, please refer to the README file in the [resources](README.md#resources) section.
+> :bulb: **Note**: For all the resources pertaining the general documentation and information regarding the technical aspects of this project, please refer to the README file in the [resources](README.md#resources) section.
 
 - [User Guide Documentation](USER_DOC.md)
 
