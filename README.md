@@ -23,7 +23,7 @@ Inception is a system administration and DevOps-oriented project. The project is
 ---
 
 The aim of this project is to provide a turn-key Docker infrastructure for running a persistent production-like Wordpress website on your local machine. it is composed of:
-- Nginx as a secure HTTPS reverse proxy acting as a single entrypoint into the infrastructe
+- NGINX as a secure HTTPS reverse proxy acting as a single entrypoint into the infrastructe
 - Wordpress with pre-configured PHP-FPM
 - MariaDB as database backend
 - Named Docker volumes for persistence of data
@@ -151,8 +151,8 @@ Since Inception requires persistence, these are best met with Docker volumes, he
 - [Docker Volume Documentation](https://docs.docker.com/engine/storage/volumes/)
 - [Understanding Docker networking](https://ostechnix.com/explaining-docker-networking-concepts/)
 - [How containers talk to each other](https://tomd.xyz/why-containers-wont-talk/)
-- [Nginx Beginner's Guide Documentation](https://nginx.org/en/docs/beginners_guide.html)
-- [How to configure Nginx to use TLS 1.2/1.3](https://www.cyberciti.biz/faq/configure-nginx-to-use-only-tls-1-2-and-1-3/)
+- [NGINX Beginner's Guide Documentation](https://nginx.org/en/docs/beginners_guide.html)
+- [How to configure NGINX to use TLS 1.2/1.3](https://www.cyberciti.biz/faq/configure-nginx-to-use-only-tls-1-2-and-1-3/)
 - [LEMP stack deployment with Docker compose](https://medium.com/swlh/wordpress-deployment-with-nginx-php-fpm-and-mariadb-using-docker-compose-55f59e5c1a)
 - [Installing MariaDB](https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04)
 - [Installing Wordpress with WP-CLI](https://blog.sucuri.net/2022/11/wp-cli-how-to-install-wordpress-via-ssh.html)
@@ -167,7 +167,7 @@ Since Inception requires persistence, these are best met with Docker volumes, he
 ```
 In this project, there was use of artificial inteligence (AI) for the following:
 - Help identifying possible causes of bugs and issues, namely MariaDB incorrect folder creation and ownership, leading to very hard to nail down issues with the database persistence.
-- Finding out how to verify TLS version used in Nginx through the terminal.
+- Finding out how to verify TLS version used in NGINX through the terminal.
 - Debugging SSL certification issue as it stopped working at some point during testing phase and could not revert.
 - Setting up a blueprint for this documentation, however, the documentation was handwritten as an execise and review of the project, as well as adding more relavant and rich information than provided.
 ```
