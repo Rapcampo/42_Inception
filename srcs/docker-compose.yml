@@ -58,8 +58,6 @@ services:
 configs:
   nginx-nginx.conf:
     file: ./requirements/nginx/dependancies/nginx.conf 
-  mariadb-my.cnf:
-    file: ./requirements/mariadb/dependancies/my.cnf
 
 volumes:
   wp-data:
