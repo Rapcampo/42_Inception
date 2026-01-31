@@ -115,21 +115,21 @@ Since Inception requires persistence, these are best met with Docker volumes, he
 
 ## Resources
 
-- [How to setup your VM](https://github.com/Bakr-1/inceptionVm-guide)
-- [What is Docker?](https://devopscube.com/what-is-docker/)
-- [Docker Official installation documentation](https://docs.docker.com/engine/install/debian/)
-- [Understanding the diference between VMs and Docker](https://medium.com/@h.stoychev87/containerization-docker-and-containers-8e8f28fd0694)
-- [Docker Volume Documentation](https://docs.docker.com/engine/storage/volumes/)
-- [Understanding Docker networking](https://ostechnix.com/explaining-docker-networking-concepts/)
-- [How containers talk to each other](https://tomd.xyz/why-containers-wont-talk/)
-- [Nginx Beginner's Guide Documentation](https://nginx.org/en/docs/beginners_guide.html)
-- [How to configure Nginx to use TLS 1.2/1.3](https://www.cyberciti.biz/faq/configure-nginx-to-use-only-tls-1-2-and-1-3/)
-- [LEMP stack deployment with Docker compose](https://medium.com/swlh/wordpress-deployment-with-nginx-php-fpm-and-mariadb-using-docker-compose-55f59e5c1a)
-- [Installing MariaDB](https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04)
-- [Installing Wordpress with WP-CLI](https://blog.sucuri.net/2022/11/wp-cli-how-to-install-wordpress-via-ssh.html)
-- [Understanding PID 1](https://medium.com/@imyzf/inception-3979046d90a0)
-- [User intended documentation](USER_DOC.md)
-- [Developer intended documentation](DEV_DOC.md)
+- [How to setup your VM](https://github.com/Bakr-1/inceptionVm-guide){:target="_blank"}
+- [What is Docker?](https://devopscube.com/what-is-docker/){:target="_blank"}
+- [Docker Official installation documentation](https://docs.docker.com/engine/install/debian/){:target="_blank"}
+- [Understanding the diference between VMs and Docker](https://medium.com/@h.stoychev87/containerization-docker-and-containers-8e8f28fd0694){:target="_blank"}
+- [Docker Volume Documentation](https://docs.docker.com/engine/storage/volumes/){:target="_blank"}
+- [Understanding Docker networking](https://ostechnix.com/explaining-docker-networking-concepts/){:target="_blank"}
+- [How containers talk to each other](https://tomd.xyz/why-containers-wont-talk/){:target="_blank"}
+- [Nginx Beginner's Guide Documentation](https://nginx.org/en/docs/beginners_guide.html){:target="_blank"}
+- [How to configure Nginx to use TLS 1.2/1.3](https://www.cyberciti.biz/faq/configure-nginx-to-use-only-tls-1-2-and-1-3/){:target="_blank"}
+- [LEMP stack deployment with Docker compose](https://medium.com/swlh/wordpress-deployment-with-nginx-php-fpm-and-mariadb-using-docker-compose-55f59e5c1a){:target="_blank"}
+- [Installing MariaDB](https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04){:target="_blank"}
+- [Installing Wordpress with WP-CLI](https://blog.sucuri.net/2022/11/wp-cli-how-to-install-wordpress-via-ssh.html){:target="_blank"}
+- [Understanding PID 1](https://medium.com/@imyzf/inception-3979046d90a0){:target="_blank"}
+- [User intended documentation](USER_DOC.md){:target="_blank"}
+- [Developer intended documentation](DEV_DOC.md){:target="_blank"}
 
 ### Use of AI
 
