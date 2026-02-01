@@ -672,7 +672,54 @@ This is pretty much all you need to make a proper Docker Compose file for this p
 ---
 
 Creating Docker Volumes to create persistance with the host machine can be a little bit tricky, one must understand why bind mounts are a bad choice for this project.
-A named volume makes so that even if 
+A named volume makes so that even if a command like `down -v` is done, the volume recreation will point to the correct existing folder as the name remains the same. More important, issues can arise in case a volume is created with a random name, in which case there are instances where the internal volume can get a different name, resulting in missmatch of information in the infrastructure.
+
+Much like the configs section, the named volumes can be created with a volumes section in the Docker Compose file. Like this:
+
+```yaml
+volumes:
+  wp-data:
+    name: wp-data
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/[username]/data/wordpress
+      o: bind
+  db-data:
+    name: db-data
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/[username]/data/mariadb
+      o: bind
+```
+
+The volumes get a reference name, Before the settings wp-data and db-data, whereas the name value is the actual volume name. It must be declared as a local driver, with the options for the device path being `$HOME/$USER/data/wordpress` as required in the subject. That volume device is bound by the address required, in order to always stay in the same path and name, which is important for persistency.
+
+The volume can be associated with the container by simply calling `volumes` option on the the container section with the target address to mount said volume. Like so:
+
+```yaml
+services:
+  nginx:
+    volumes:
+     - wp-data:/var/www/html
+
+```
+
+Docker volumes can be checked with the command:
+
+```bash
+docker volume ls
+```
+
+Detailed information can be retrieved by using `inspect` command, like so:
+```bash
+docker volume inspect wp-data
+```
+
+Detailed information will be given. If everything went correct, you can shutdown your machine and the website information will be kept the same, which is easy to test with a comment or a theme change (comments need to be approved in the wordpress admin panel).
+
+Running `make down` and `make` again, or `make re` for a complete rebuild, should also result in the comments and settings persisting.
 
 ## Resources
 
