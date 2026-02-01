@@ -8,12 +8,11 @@
   - [Configuration Files](#configuration-files)
     - [How Dockerfiles Work](#how-dockerfiles-work)
     - [NGINX](#nginx)
-    - [Wordpress](#wordpress)
+    - [Wordpress](#Wordpress)
     - [MariaDB](#mariadb)
   - [Setting up Secrets](#setting-up-secrets)
   - [Makefile and Docker Compose](#makefile-and-docker-compose)
   - [Docker Volumes](#docker-volumes)
-- [Relevant Commands](#relevant-commands)
 - [Resources](#resources)
 
 ## Description
@@ -52,7 +51,7 @@ When it comes to setting up this project, it is important to understand the prop
 │       │   ├── Dockerfile
 │       │   └── tools
 │       │       └── nginx.conf
-│       └── wordpress
+│       └── Wordpress
 │           ├── Dockerfile
 │           └── tools
 │               └── script.sh
@@ -235,7 +234,7 @@ Here is a brief table with important Dockerfile keywords:
 | FROM | Creates a new build stage from an image |
 | RUN | Execute build commands (much like in a shell) |
 
-> :note: **NOTE**: For a complete table of commands, refer to the official[dockerfile reference guide](https://docs.docker.com/reference/dockerfile/)
+> :spiral_notepad: **NOTE**: For a complete table of commands, refer to the official [Dockerfile Reference Guide](https://docs.docker.com/reference/dockerfile/)
 
 You can build all the Dockerfiles necessary for this project with these commands. Moreover, here is an example of what a Dockerfile for this project would look like:
 
@@ -293,7 +292,7 @@ So for NGINX, we need the following components to make it work in this project:
   - Point to ssl_certificate and ssl_certificate_key locations pointed during creation on Dockerfile
   - Choose ssl_protocols to only `TLSv1.2 TLSv1.3`
   - Setup fastCGI proxying to work with PHP-FPM 
-  - Make sure fastcgi_pass points to wordpress on port 9000
+  - Make sure fastcgi_pass points to Wordpress on port 9000
 
 This is pretty much it for NGINX, we can create the certificate with the following command:
 
@@ -306,10 +305,13 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 
 the OpenSSL creates a X.509 certificate signing request, which we then tell with `-x509` that we want to self-sign it, instead of generating a request. We proceed to tell OpenSSL `-nodes` to skip certificate passphrase security, in order to NGINX to be able to read the file without user intervention. We set the days of validity for the request and generate a certificate and key with `-newkey rsa:2048` using a 2048 bits long RSA key. `-keyout` and `-out` are the locations for the outputs of the request, whilist `-subj` is the information present in the certificate.
 
-> :note: **note**: for a more in depth deep dive in how to create the certificate works, check [this](https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-in-ubuntu-16-04) wonderful guide!
-> :note: **note**: for a more in depth guide on how to setup FastCGI proxying on NGINX read [this](https://www.digitalocean.com/community/tutorials/understanding-and-implementing-fastcgi-proxying-in-nginx#why-use-fastcgi-proxying)!
+> :spiral_notepad: **Note**: for a more in depth deep dive in how to create the certificate works, check [this](https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-in-ubuntu-16-04) wonderful guide!
 
-##### Testing
+> :spiral_notepad: **Note**: for a more in depth guide on how to setup FastCGI proxying on NGINX read [this](https://www.digitalocean.com/community/tutorials/understanding-and-implementing-fastcgi-proxying-in-nginx#why-use-fastcgi-proxying)!
+
+It is also very important to note that NGINX should be run in the foreground with daemon off, for Docker to be able to correctly assess the health of the container. This is quite important as Docker monitors PID 1 as the main process to be checked for health and stability of the container, which with the daemon being on, would fork off to a different PID.
+
+##### Debugging
 
 If everything worked correct, trying to access `https://[username].42.fr` should show a warning sign of self signed certificate, proceed should let you verify in the lock :lock: icon and clicking `connection not secure` should show a see more information button and an option `View Certificate` should be present. Otherwise, they certificate has not been generated correctly.
 
@@ -323,26 +325,354 @@ openssl s_client -connect [username].42.fr:443 -servername [username].42.fr -sho
 
 Which should output the complete certificate information in great detail.
 
+Of course, in case of errors, one should always check the logs with:
+
+```bash
+docker logs -f nginx
+#can also be run with -n or --tail to print a certain number of lines
+
+#or if Docker Compose file is ready
+docker compose -f ./srcs/docker-compose.yml logs -f nginx
+#this assumes you are at the root of your folder, for ease of making a remaking the project after changes
+```
+
+#### Wordpress
+
+For the Wordpress container, you need to properly install and configure PHP-FPM, as the php language processor, since NGINX itself, cannot process php files. It is also necessary to install the wp-cli package.
+
+Here is a breakdown of what is necessary for the Wordpress container to work properly:
+
+- On Dockerfile:
+  - Install php-fpm php-mysql curl unzip default-mysql-client packages
+  - Create runtime php folder `/run/php` and the html folder default for Wordpress installations `/var/www/html`
+  - Change the www.conf file to listen to port 9000 on this network (0.0.0.0)
+  - Also advisable to increase the memory limit in www.conf file to avoid 502 errors
+  - Give ownership of `www-data` user to the `/var/www/html` folder
+  - Create a `configgroup` and add `www-data` to this group
+  - Curl wp-cli and move it to $PATH
+  - Run a page configuration script
+- On tools:
+  - Create a script for downloading, configurating and installing Wordpress core
+  - On core installation, creating the Wordpress Admin credentials
+  - Create a Wordpress user with the credentials
+  - Finally execute php-fpm (Obs.: executing php-fpm requires the correct version to be called e.g. php-fpm8.2, otherwise the container will keep restarting)
+
+For editing the www.conf file, there are 2 main ways to go about it. You can create a www.conf file inside your tools folder and point it in your Docker Compose as a configuration file for the container, or, simply edit the file directly upon installation with sed command like so:
+
+```bash
+sed -i 's|^listen = .*|listen = 0.0.0.0:9000|' /etc/php/*/fpm/pool.d/www.conf \
+&& sed -i 's|^;php_admin_value[memory_limit]= .*|php_admin_value[memory_limit] = 512M|'\
+	/etc/php/*/fpm/pool.d/www.conf
+```
+
+That way we can replace the corresponding excerpts to substitute with the information we want.
+
+On the script we will for the first time interact with Docker Secrets, since you will need the Wordpress user password,  and Wordpress admin password. You can do so by creating a temporary variable in the script and reading from memory the secrets folder like so:
+
+```bash
+WP_ADMIN_PASSWORD="$(< /run/secrets/wp_admin_password)"
+WP_DB_PASSWORD="$(< /run/secrets/wp_admin_password)"
+WP_USER_PASSWORD="$(< /run/secrets/wp_admin_password)"
+```
+
+This way, you avoid leaking the secrets by avoiding having them in your environment variables.
+
+Here is also important to have your environment variables set, preferably in the `.env` file, with the following relevant information:
+
+```bash
+DOMAIN_NAME="[username].42.fr"
+
+WP_TITLE="INCEPTION"
+WP_DB_HOST=mariadb
+WP_DB_NAME=Wordpress
+WP_DB_USER=dbuser
+
+WP_ADMIN_USER=superuser
+WP_ADMIN_EMAIL=superuser@example.com
+
+WP_USER=wpuser
+WP_EMAIL=wpuser@example.com
+
+WP_URL="https://$DOMAIN_NAME"
+```
+
+It is also important to note, for the script, before installing Wordpress, that MariaDB database is running by pinging and waiting for a response. This guarantees that the database files and database user has been created in order to store the Wordpress tables.
+
+##### Debugging
+
+Upon accessing `https://[username].42.fr` you should never see a Wordpress installation page, if you see one, something along the lines of installation or user creation has not been working correctly.
+
+Of course, in case of errors, one should always check the logs with:
+
+```bash
+docker logs -f wordpress
+#can also be run with -n or --tail to print a certain number of lines
+
+#or if Docker Compose file is ready
+docker compose -f ./srcs/docker-compose.yml logs -f wordpress
+#this assumes you are at the root of your folder, for ease of making a remaking the project after changes
+```
+
+#### MariaDB 
+
+For the MariaDB container, to work, you need to install only a few packages, however, the complex part is in having your script run with SQL parameters for chaging root password and creating the Wordpress user.
+
+Here is a breakdown of what is necessary for the Wordpress container to work properly:
+
+- On Dockerfile:
+  - Install gosu mariadb-server packages
+  - Create runtime mysql folder `/run/mysqld` and mysql main data folder `/var/lib/mysql`
+  - Grant ownership of of these directories to mysql:mysql user
+- On tools:
+  - The script should verify the need for database installation
+  - In case there is need, `mariadb-install-db --user=mysql --datadir=/var/lib/mysql` should be run
+  - After installation, a first run of `mysql mariadbd` in socket listening mode only to avoid triggering the Wordpress container installation.
+  - Connect to MariaDB via socket to set root password, create Wordpress database, database user and grant all privileges on Wordpress database to that user.
+  - Execute `mysql mariadbd --datadir=/var/lib/mysql --bind-address=0.0.0.0` so the database listens to this network on tcp mode.
+
+Much like Wordpress script, here we need to read Docker Secrets from memory and create a temporary variable like so:
+
+```bash
+DB_ROOT_PASSWORD="$(< /run/secrets/db_root_pass)"
+WP_DB_PASSWORD="$(< /run/secrets/db_pass)"
+```
+
+As well as use the environment variables passed to this container for the SQL part of the script. For the database and user they can be create this way:
+
+```bash
+mariadb --protocol=socket --socket="/tmp/mysql.sock" -uroot -p"$DB_ROOT_PASSWORD" <<EOSQL
+ALTER USER 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASSWORD';
+CREATE DATABASE IF NOT EXISTS \`$WP_DB_NAME\`;
+CREATE USER IF NOT EXISTS '$WP_DB_USER'@'%' IDENTIFIED BY '$WP_DB_PASSWORD';
+GRANT ALL PRIVILEGES ON \`$WP_DB_NAME\`.* TO '$WP_DB_USER'@'%';
+FLUSH PRIVILEGES;
+EOSQL
+```
+
+If everything went correctly, your database and user list should look like this:
+```bash
+docker exec -it mariadb sh -lc 'mariadb -uroot -p"$(cat /run/secrets/db_root_pass)" -e "SHOW DATABASES; SELECT user,host FROM mysql.user;"'
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+| wordpress          |
++--------------------+
++-------------+-----------+
+| User        | Host      |
++-------------+-----------+
+| dbuser      | %         |
+| mariadb.sys | localhost |
+| mysql       | localhost |
+| root        | localhost |
++-------------+-----------+
+```
+
+At this point, if the Wordpress installation went correctly, you should see all Wordpress tables like so:
+
+```bash
+docker exec -it mariadb sh -lc 'mariadb -uroot -p"$(cat /run/secrets/db_root_pass)" -e "USE wordpress; SHOW TABLES;"'
++-----------------------+
+| Tables_in_wordpress   |
++-----------------------+
+| wp_commentmeta        |
+| wp_comments           |
+| wp_links              |
+| wp_options            |
+| wp_postmeta           |
+| wp_posts              |
+| wp_term_relationships |
+| wp_term_taxonomy      |
+| wp_termmeta           |
+| wp_terms              |
+| wp_usermeta           |
+| wp_users              |
++-----------------------+
+```
+
+#### Debugging
+
+Particularly for MariaDB, it is very important to run logs, as it will be a clear tell if everything went correctly, the startup is very verbose and should be clear on errors.
+If you setup in your Wordpress script to try and ping the MariaDB database, it should also be clear in the logs if something is wrong as there will be constant messages of connection refused from an unknown user, if proper database and user creation failed.
+
+```bash
+docker logs -f mariadb 
+#can also be run with -n or --tail to print a certain number of lines
+
+#or if Docker Compose file is ready
+docker compose -f ./srcs/docker-compose.yml logs -f mariadb
+#this assumes you are at the root of your folder, for ease of making a remaking the project after changes
+```
+
+The previous commands for checking the database are also very useful:
+
+```bash
+docker exec -it mariadb sh -lc 'mariadb -uroot -p"$(cat /run/secrets/db_root_pass)" -e "SHOW DATABASES; SELECT user,host FROM mysql.user;"'
+docker exec -it mariadb sh -lc 'mariadb -uroot -p"$(cat /run/secrets/db_root_pass)" -e "USE wordpress; SHOW TABLES;"'
+```
+
+If you just want to access the MariaDB database and do manual checks with it, you can always log with:
+
+```bash
+docker exec -it mariadb sh -lc 'mariadb -uroot -p"$(cat /run/secrets/db_root_pass)"
+```
+Which will take you to the Database shell.
+
 ### Setting up Secrets
 
 ---
+
+For setting up secrets, it is a fairly simple process with a few things to notice. First, when setting up a secret in Docker Compose, the name you give to it in the Secrets section of your script, will be the name of the file inside the container, not the name you give the file on your virtual machine. As an example:
+
+```yml
+secrets:
+  wp_user_pass:
+    file: ../secrets/wp_user_password.txt
+  wp_admin_pass:
+    file: ../secrets/wp_admin_password.txt
+  db_root_pass:
+    file: ../secrets/db_root_password.txt
+  db_pass:
+    file: ../secrets/db_password.txt
+```
+
+This mean, that the name of the secret pertaning wp_user_password.txt, will be a file named wp_user_pass inside the container. This is relevant if you want to give the files shorter names and find yourself having problems with authentication.
+
+Another thing to notice is that the name of the secret inside container service paramenter in your Docker Compose must also followthis name, as an example:
+
+```yaml
+services:
+   mariadb:
+    build: ./requirements/mariadb
+    image: mariadb
+    pull_policy: never
+    restart: unless-stopped
+    container_name: mariadb
+    secrets:
+      - wp_admin_pass
+      - db_pass
+      - db_root_pass
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - inception
+    env_file:
+      - .env
+```
+
+You can notice the names must follow the secret name and not the file name itself, unless they are the same. You can also see that the rule env_file is where you pass your `.env` file as an argument to be read by the containers, this is very important for proper credentials also.
+
+Last important thing about Secrets is that they must never be present on a Git repository, so a `.gitignore` rule for this is very important, which will also keep your folder structure intact even without the files itself there. As such it is important to create the credentials when running the project for the first time, which can be done this way:
+
+```bash
+echo "[your_database_user_password]" > secrets/db_password.txt
+echo "[your_database_root_password]" > secrets/db_root_password.txt
+echo "[your_wordpress_user_password]" > secrets/wp_user_password.txt
+echo "[your_wordpress_admin_password]" > secrets/wp_admin_password.txt
+```
+
+You can always check if the Secrets have been properly passed to the containers by running `docker exec -it [a service] ls -la /run/secrets/` which should output files it they exist.
 
 ### Makefile and Docker Compose
 
 ---
 
+For the Makefile you can create a simple one with a few rules that will help you quickly setup and debug the project, my recommendation is making something like this:
+
+```makefile
+all: up
+
+up:
+	mkdir -p /home/[username]/data/mariadb
+	mkdir -p /home/[username]/data/wordpress
+	docker compose -f ./srcs/docker-compose.yml up -d --build
+
+down:
+	docker compose -f ./srcs/docker-compose.yml down
+
+re: 
+	docker compose -f ./srcs/docker-compose.yml up -d --build --force-recreate
+
+clean:
+	docker compose -f ./srcs/docker-compose.yml down -v 
+
+fclean:
+	docker stop $$(docker ps -qa)
+	docker rm $$(docker ps -qa)
+	docker rmi -f $$(docker images -qa)
+	docker volume rm $$(docker volume ls -q)
+	docker system prune -a
+	sudo rm -rf /home/[username]/data
+```
+
+It is **VERY IMPORTANT** that you create the mariadb and wordpress directories on the host machine before doing anything else, as they are necessary for the Docker Volumes to work properly in the next section.
+
+It is also important to note that `down -v` dessociates and eliminates the volume inside the container, which can be a good telltale if something is not properly setup on the persistence, more on this next section.
+
+For Docker Compose, as it uses YAML syntax, it is fairly simple and straight forward to make configuration files, the one thing to notice is that since there are no brackets to separate categories and logical divisions, it is indentation dependant which can be hard to visualize.
+
+A simple example of a Docker Compose file, can be seen in this NGINX setup service:
+```yaml
+services:
+  nginx:
+    build: ./requirements/nginx
+    image: nginx
+    pull_policy: never
+    container_name: nginx
+    restart: unless-stopped
+    volumes:
+      - wp-data:/var/www/html
+    ports:
+      - 443:443
+    networks:
+      - inception
+    configs:
+      - source: nginx-nginx.conf
+        target: /etc/nginx/nginx.conf
+    env_file:
+      - .env
+    depends_on:
+      - wordpress
+
+configs:
+  nginx-nginx.conf:
+    file: ./requirements/nginx/tools/nginx.conf 
+
+networks:
+  inception:
+    name: inception
+      driver: bridge
+```
+
+In this example we can see most of the parameters needed for this project.
+
+| Keyword | Description |
+| --- | --- |
+| `build` | Finds the Dockerfile target folder |
+| `image` | Gives the image name |
+| `pull_policy: never` | Tell Docker Compose not to try pulling the image from Dockerhub instead to use the build parameter. |
+| `restart: unless_stopped` | Defines restart policy of the container |
+| `volumes` | Creates a volume inside the container with the name `wp-data` |
+| `ports` | Opens the port to the host machine |
+| `networks` | Tells which network the container belongs to |
+| `configs` | Takes a config file pointed in configs section and applies to target location |
+| `env_file` | Take in the environment variables file in this paramenter, in this case, .env is in the same folder |
+| `depends_on` | Tells build order for the Docker Compose file |
+| `networks` | Section tells the name of the network and the driver used for it |
+
+This is pretty much all you need to make a proper Docker Compose file for this project, it is very straight forward and simple and with the proper Makefile rules makes the workflow very simple and repeatable.
+
+> :bulb: **Note**: You can see more relevant information about Docker Compose in the documentation [here](https://docs.docker.com/reference/cli/docker/compose/)
 
 ### Docker Volumes
 
 ---
 
-## Relevant Commands
-
-important commands:
-`docker exec -it [container name] [command to be used]`
-verify ssl certs and version
-
-pid 1 is important for docker to keep track of the health of the container, therefore deamon services should not branch off from this pid as a way to guarantee proper tracking and signals when docker stop is invoked
+Creating Docker Volumes to create persistance with the host machine can be a little bit tricky, one must understand why bind mounts are a bad choice for this project.
+A named volume makes so that even if 
 
 ## Resources
 

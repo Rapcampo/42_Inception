@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y php-fpm php-mysql curl unzip \
 	&& mkdir -p /run/php /var/www/html \
 	&& sed -i 's|^listen = .*|listen = 0.0.0.0:9000|' \
 	/etc/php/*/fpm/pool.d/www.conf && sed -i \
-	's|^php_admin_value[memory_limit]= .*|php_admin_value[memory_limit] = 512M|'\
+	's|^;php_admin_value[memory_limit]= .*|php_admin_value[memory_limit] = 512M|'\
 	/etc/php/*/fpm/pool.d/www.conf
 
 RUN chown -R www-data:www-data /var/www/html \
