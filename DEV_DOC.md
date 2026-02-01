@@ -6,6 +6,10 @@
   - [Prerequisites](#prerequisites)
   - [Virtual Machine Setup](#virtual-machine-setup)
   - [Configuration Files](#configuration-files)
+    - [How Dockerfiles Work](#how-dockerfiles-work)
+    - [NGINX](#nginx)
+    - [Wordpress](#wordpress)
+    - [MariaDB](#mariadb)
   - [Setting up Secrets](#setting-up-secrets)
   - [Makefile and Docker Compose](#makefile-and-docker-compose)
   - [Docker Volumes](#docker-volumes)
@@ -209,6 +213,116 @@ Now everything needed to start the project itself is done. One can access the xi
 
 ---
 
+When it comes to configuration files, it is important to understand how Dockerfiles work, and how to run your Docker container without Docker Compose first. Configurations will be separated by container services, with other relevant information in between.
+
+#### How Dockerfile Works
+
+It is important to understand how Dockerfile works. In general, it is fairly simple if you visualize the keywords from it as a Macro for a command that interacts with the base image. The base image in this case will be Debian (oldstable, as it is required to be the penultimate version), but it can also be Alpine, which would differ slightly in folder location, commands and package names.
+
+It is important to understand that there is a concept of layering in images, with each command running an independent shell. This can lead to artifacts if there are too many small commands, when you can just logically chain them with `&&`, which is important for image size.
+
+Another important good practice, it is to always do a cleanup after installing packages with `apt-get clean && rm -rf /var/lib/apt/lists/*` in order to eliminate unnecessary files in order to redute image size.
+
+Here is a brief table with important Dockerfile keywords:
+
+| Keyword | Description |
+| --- | --- |
+| CMD | Specify default commands (Can be used on container startup) |
+| COPY | Copy files and directories (effectively can be used from host to container) |
+| ENTRYPOINT | Specify default executable (Fairly similar to CMD) |
+| ENV | Set environment variables |
+| EXPOSE | Describe which Ports your machine are listning on (metadata only) | 
+| FROM | Creates a new build stage from an image |
+| RUN | Execute build commands (much like in a shell) |
+
+> :note: **NOTE**: For a complete table of commands, refer to the official[dockerfile reference guide](https://docs.docker.com/reference/dockerfile/)
+
+You can build all the Dockerfiles necessary for this project with these commands. Moreover, here is an example of what a Dockerfile for this project would look like:
+
+```dockerfile
+FROM debian:bookworm
+#choose a base image for you container
+
+RUN apt-get update \
+#always update before installations
+    && apt-get install [packages to be installed] \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+#for the sake of size and having less artifacts, always clean up after installations
+    && mkdir -p /folder/neccessary/for/package/ \
+#sometimes when installing packages the necessary folders are not automatically created, very important
+    && chown -R packagegroup:packagegroup /folder/necessary/for/package
+#sometimes if ownership of the folder is not given to the package group, the container may constantly restart
+
+COPY tools/script.sh /usr/local/bin/script.sh
+#effectively copying from host machine to container, in case you want to run a setup script on container startup
+
+RUN chmod +x /usr/local/bin/script.sh
+#script needs permission to be executed inside the container
+
+EXPOSE 4242
+#metadata to that will show the port this container is working with in commands such as docker ps
+
+WORKDIR /folder/necessary/for/package/
+#sometimes it is important to change to a specific folder, in case you want to execute the script from this folder path
+
+ENTRYPOINT ["script.sh"]
+#the first command/executable that will run on container startup
+
+```
+
+This should give a pretty good idea of how these Dockerfiles work, as a generic example and as you will see later on, we do not need to use the ENV keyword here, because we will be using it in Docker Compose, however, if you would like to test a service by itself with environment variables you can use it here also.
+
+#### NGINX
+
+For NGINX, you need to generate an SSL certificate (self-signed is ok) which requires the installation of OpenSSL to create the certificate. 
+
+So for NGINX, we need the following components to make it work in this project:
+
+- On Dockerfile:
+  - nginx package
+  - openssl package
+  - create ssl folder inside NGINX `/etc/nginx/ssl`
+  - create runtime NGINX folder `/run/nginx/`
+  - create NGINX log folder `/var/log/nginx/`
+  - create the certificate with openssl having the key output and certificate inside `/etc/nginx/ssl`
+  - during the certificate creation fill the subject information
+- On tools:
+  - Create nginx.conf file for the NGINX configuration
+  - Configure it to listen only to port 443 ssl
+  - and the server_name to be `[username].42.fr`
+  - Point to ssl_certificate and ssl_certificate_key locations pointed during creation on Dockerfile
+  - Choose ssl_protocols to only `TLSv1.2 TLSv1.3`
+  - Setup fastCGI proxying to work with PHP-FPM 
+  - Make sure fastcgi_pass points to wordpress on port 9000
+
+This is pretty much it for NGINX, we can create the certificate with the following command:
+
+```bash
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+	-keyout /etc/nginx/ssl/nginx.key \
+	-out /etc/nginx/ssl/nginx.crt \
+	-subj "/C=PT/ST=Porto/L=Porto/O=42inception/OU=Dev/CN=rapcampo.42.fr"
+```
+
+the OpenSSL creates a X.509 certificate signing request, which we then tell with `-x509` that we want to self-sign it, instead of generating a request. We proceed to tell OpenSSL `-nodes` to skip certificate passphrase security, in order to NGINX to be able to read the file without user intervention. We set the days of validity for the request and generate a certificate and key with `-newkey rsa:2048` using a 2048 bits long RSA key. `-keyout` and `-out` are the locations for the outputs of the request, whilist `-subj` is the information present in the certificate.
+
+> :note: **note**: for a more in depth deep dive in how to create the certificate works, check [this](https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-in-ubuntu-16-04) wonderful guide!
+> :note: **note**: for a more in depth guide on how to setup FastCGI proxying on NGINX read [this](https://www.digitalocean.com/community/tutorials/understanding-and-implementing-fastcgi-proxying-in-nginx#why-use-fastcgi-proxying)!
+
+##### Testing
+
+If everything worked correct, trying to access `https://[username].42.fr` should show a warning sign of self signed certificate, proceed should let you verify in the lock :lock: icon and clicking `connection not secure` should show a see more information button and an option `View Certificate` should be present. Otherwise, they certificate has not been generated correctly.
+
+On the same security page info should also show in the technical details the TLS version being used. Make sure it is 1.2 or 1.3.
+
+The certificate can also be seen in the terminal without using a browser by connecting to it with openssl on your virtual machinewith the following command:
+
+```bash
+openssl s_client -connect [username].42.fr:443 -servername [username].42.fr -showcerts </dev/null
+```
+
+Which should output the complete certificate information in great detail.
+
 ### Setting up Secrets
 
 ---
@@ -217,8 +331,6 @@ Now everything needed to start the project itself is done. One can access the xi
 
 ---
 
-When it comes to creating a project like Inception from scratch it is important to break down the services and tackle one by one. Trying to do all services at once will quickly overwhelm you and make debugging very hard.
-My suggest path for setting up services is `NGINX -> Wordpress -> MariaDB`, one should familiarize with creating Dockerfiles for the each service and how to run containers without setting up Docker Compose. After setting up Wordpress, it would be the best time to start making your Docker Compose to launch multiple services.
 
 ### Docker Volumes
 
@@ -229,11 +341,6 @@ My suggest path for setting up services is `NGINX -> Wordpress -> MariaDB`, one 
 important commands:
 `docker exec -it [container name] [command to be used]`
 verify ssl certs and version
-`openssl s_client -connect [username].42.fr:443 -servername [username].42.fr -showcerts </dev/null`
-verify folder struct:
-`tree -I -a .`
-Verify hostname is correct:
-`grep [username].42.fr /etc/hosts`
 
 pid 1 is important for docker to keep track of the health of the container, therefore deamon services should not branch off from this pid as a way to guarantee proper tracking and signals when docker stop is invoked
 
@@ -242,5 +349,3 @@ pid 1 is important for docker to keep track of the health of the container, ther
 > :bulb: **Note**: For all the resources pertaining the general documentation and information regarding the technical aspects of this project, please refer to the README file in the [resources](README.md#resources) section.
 
 - [User Guide Documentation](USER_DOC.md)
-
-

@@ -18,6 +18,8 @@
 
 Inception is a system administration and DevOps-oriented project. The project is focused on automated-deployment and containerized WordPress LEMP stack small infrastructure. The goal is to design, build and run a multi-service stack with strong isolation, reproducibility, and security constraints, using Docker Compose and custom-built Docker images.
 
+> :bulb: **NOTICE**: For a detailed guide on how to setup such an infrastructure, please refer to the [developer documentation](DEV_DOC.md) as I go in greater detail about this project there.
+
 ### Brief overview
 
 ---
@@ -157,6 +159,7 @@ Since Inception requires persistence, these are best met with Docker volumes, he
 - [Installing MariaDB](https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04)
 - [Installing Wordpress with WP-CLI](https://blog.sucuri.net/2022/11/wp-cli-how-to-install-wordpress-via-ssh.html)
 - [Understanding PID 1](https://medium.com/@imyzf/inception-3979046d90a0)
+- [Docker Cheat Sheet](https://dockerlabs.collabnix.com/docker/cheatsheet/)
 - [User intended documentation](USER_DOC.md)
 - [Developer intended documentation](DEV_DOC.md)
 
