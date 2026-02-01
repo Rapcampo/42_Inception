@@ -27,12 +27,10 @@ This is a regular user facing documentation aimed to provide a high level explan
 
 Effectively speaking this project is a LEMP stack, which is a acronym for:
 
-```
-**L**inux
-**E**ngineX (NGINX)
-**M**ariaDB
-**P**HP-FPM
-```
+- **L**inux
+- **E**ngineX (NGINX)
+- **M**ariaDB
+- **P**HP-FPM
 
 Therefore, using a linux (in this case debian) base, three services are provided, with one container per service. Which are the following:
 

@@ -57,7 +57,7 @@ services:
 
 configs:
   nginx-nginx.conf:
-    file: ./requirements/nginx/dependancies/nginx.conf 
+    file: ./requirements/nginx/tools/nginx.conf 
 
 volumes:
   wp-data:
