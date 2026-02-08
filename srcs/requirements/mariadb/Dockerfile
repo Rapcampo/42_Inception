@@ -1,7 +1,7 @@
 FROM debian:oldstable
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-	gosu gettext-base mariadb-server \
+	gosu mariadb-server \
 	&& apt-get clean && rm -rf /var/lib/apt/lists/* \
 	&& mkdir -p /run/mysqld /var/lib/mysql \
 	&& chown -R mysql:mysql /run/mysqld /var/lib/mysql
