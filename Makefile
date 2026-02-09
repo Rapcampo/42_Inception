@@ -34,6 +34,6 @@ log_nginx:
 database:
 	docker exec -it mariadb sh -lc 'mariadb -uroot -p"$(cat /run/secrets/db_root_pass)" -e "SHOW DATABASES; SELECT user,host FROM mysql.user;"'
 tables:
-	docker exec -it mariadb sh -lc 'mariadb -uroot -p"$(cat /run/secrets/db_root_pass)" -e "SHOW DATABASES; USE \`$WP_DB_NAME\`; SHOW TABLES;"'
+	docker exec -it mariadb sh -lc 'mariadb -uroot -p"$(cat /run/secrets/db_root_pass)" -e "SHOW DATABASES; USE wordpress; SHOW TABLES;"'
 
 .PHONY: all up down re clean fclean
