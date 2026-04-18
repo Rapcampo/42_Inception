@@ -145,7 +145,7 @@ root    ALL=(ALL:ALL) ALL
 It is helpful to change the default ssh port to port 4242, and then restaring the service, which can be done with:
 
 ```bash
-sudo sed -i "s|Port 22| Port 4242" /etc/ssh/sshd_config \
+sudo sed -i "s|# Port 22| Port 4242|" /etc/ssh/sshd_config \
 && sudo service ssh restart
 ```
 Now you can remotely access your Virtual Machine through SSH with:
@@ -178,6 +178,9 @@ echo \
   "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
   "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# update the repos to reflect these changes
+sudo apt update
 ```
 
 2. Install the Docker Packages (which includes Docker Compose)
